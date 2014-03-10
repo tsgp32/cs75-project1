@@ -8,8 +8,11 @@
 /	Created by: Scott Owen
 /--------------------------------------------------------------------------------
 */
-
-
+define("CASH","10000");
+define("DB_HOST","localhost");
+define("DB_NAME","finance75");
+define("DB_USER", "jharvard");
+define("DB_PW", "crimson");
 
 
 
@@ -21,32 +24,38 @@
 //	affected for error handling.
 //***************************************************************************
 function addUser($user_info){
-	//initially give the user $1000 to invest
-	$cash = 1000;
+	$cash = 10000;
 	extract($user_info);
 	//connect to database with PDO and se predefined un/pw for testing purposes:
  	$DBH = new PDO("mysql:host=localhost;dbname = finance75","jharvard","crimson");
 	
 	//query the database for the username entered in the form field using a prepared statement: 
-	$STH = $DBH->prepare("INSERT INTO finance75.users(username,password,firstname,lastname,cash)
+	try{
+		$STH = $DBH->prepare("INSERT INTO finance75.users(username,password,firstname,lastname,cash)
 			    VALUES(:username,:password,:firstname,:lastname,:cash)");
-	//bind the value entered by user into the query string
-	$STH ->bindvalue(':username' , $username);
-	$STH ->bindvalue(':password' , $password);
-	$STH ->bindvalue(':firstname', $firstname);			
-	$STH ->bindvalue(':lastname' , $lastname);
-	$STH ->bindvalue(':cash'     , $cash);
+		//bind the value entered by user into the query string
+		$STH ->bindvalue(':username' , $username);
+		$STH ->bindvalue(':password' , $password);
+		$STH ->bindvalue(':firstname', $firstname);			
+		$STH ->bindvalue(':lastname' , $lastname);
+		$STH ->bindvalue(':cash'     , $cash);
 			
-	//execute the query
-	$STH ->execute();
+		//execute the query
+		$STH ->execute();
+	}
+	
+	catch(Exception $e){
+		echo('unable to add user');
+		exit;
+	}
+	
 	// count rows affected:
-	$rows_affected = $STH->rowCount();
 	$_SESSION['authorize']=1;
 	$_SESSION['username'] = $_POST['username'];
 	$_SESSION['cash'] =$cash;
 	$DBH = null;
-
-	}
+	
+}
 //***************************************************************************
 // This function queries the database to check if user is already a member.
 //***************************************************************************
@@ -207,7 +216,7 @@ function sellstock($stock, $shares){
 	
 	//connect to database with PDO:
 	$DBH = new PDO("mysql:host=localhost;dbname = finance75","jharvard","crimson");
-
+	$DBH ->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	//------------------------------------------------------------------------
 	//		QUERY THE DATABASE TO SEE IF YOU ALREADY OWN THE STOCK
 	//------------------------------------------------------------------------	
@@ -221,8 +230,9 @@ function sellstock($stock, $shares){
 		//execute the query
 		$STHq ->execute();
 	}
-	catch(Exception $e){
-		echo('could not query database');
+	catch(PDOException $e){
+		echo('Unable to connect to database: ' . $e->getMessage());
+		exit;
 	}
 	if($STHq->rowCount()>0){
 		$row = $STHq->fetch(PDO::FETCH_ASSOC);
@@ -278,7 +288,7 @@ function sellstock($stock, $shares){
 //	original cash balance.   
 //***************************************************************************
 function reset_user($username){
-	$cash = 1000;
+	$cash = 10000;
 	//connect to database with PDO:
 	$DBH = new PDO("mysql:host=localhost;dbname = finance75","jharvard","crimson");
 	
@@ -296,6 +306,41 @@ function reset_user($username){
 	$STH2 ->execute();	
 
 
+}
+//***************************************************************************
+//This function adds the transaction to the users history.  The function inputs
+//	are the $stock array and the $type which is either a buy or sell.  The goal
+//	of this function is to be able to display an entire list of previous purchases
+//	that may be  
+//***************************************************************************
+function addTransaction($stock, $shares, $type){
+	//need to remove the indexing that is added in preg_split
+	$mystock=$stock[0];	
+	$date = date('Y-m-d');	
+	//connect to database with PDO:
+	$DBH = new PDO("mysql:host=localhost;dbname = finance75","jharvard","crimson");
+	$DBH ->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);	
+	
+	try{
+		//query the database for the username entered in the form field using a prepared statement: 
+			$STH = $DBH->prepare("
+				INSERT INTO finance75.transactions(username,symbol,date,price,shares,transType)
+				VALUES(:username,:symbol,:date,:price,:shares,:transType)");
+				
+		//bind the value entered by user into the query string
+		$STH ->bindvalue(':username',	$_SESSION['username']);
+		$STH ->bindvalue(':symbol', 	$mystock['symbol']);
+		$STH ->bindvalue(':date',		$date);
+		$STH ->bindvalue(':price',		$mystock['price']);
+		$STH ->bindvalue(':shares',		$shares);
+		$STH ->bindvalue(':transType',	$type);
+		//execute the query
+		$STH ->execute();
+	}
+	catch(PDOException $e){
+		echo('Unable to upload transaction:'. $e->getMessage());
+		exit;
+	}
 }
 ?>
 	

@@ -37,11 +37,13 @@ else{
 
 		if($_POST['buysell'] == 'Buy'){
 			buystock($stock,$_POST['shares']);
+			addTransaction($stock,$_POST['shares'],$type='Buy');
 			redirect('portfolio');
 			exit;
 		}		
 		elseif($_POST['buysell']=='Sell'){
 			sellstock($stock,$_POST['shares']);	
+			addTransaction($stock,$_POST['shares'],$type='Sell');
 			redirect('portfolio');
 			exit;
 		}		

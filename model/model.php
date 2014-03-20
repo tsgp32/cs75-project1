@@ -18,6 +18,8 @@ define("DB_PW", "crimson");
 
 
 
+
+
 //***************************************************************************
 //This function will take in the user info as an array, 
 //	and add the user to the database.  it will return the number of rows 
@@ -29,38 +31,112 @@ function addUser($user_info){
 	//connect to database with PDO and se predefined un/pw for testing purposes:
  	$DBH = new PDO("mysql:host=localhost;dbname = finance75","jharvard","crimson");
 	
+	//********************************
+	//	Check if username is available
+	//********************************
+	
+	//query the database for the username entered in the form field using a prepared statement: 
+	$STHc = $DBH->prepare("SELECT * FROM finance75.users WHERE username = :username");
+	//bind the value entered by user into the query string
+	$STHc ->bindvalue(':username',$username);
+	//execute the query
+	$STHc ->execute();
+		
+	//use the fetch command to set the returned values into an associate array
+	if($STHc->rowCount()){
+		echo("username already in datebase");
+		exit;	
+	}
+
+	//**************************************
+	//	Add username and information if able
+	//**************************************
+	
 	//query the database for the username entered in the form field using a prepared statement: 
 	try{
-		$STH = $DBH->prepare("INSERT INTO finance75.users(username,password,firstname,lastname,cash)
-			    VALUES(:username,:password,:firstname,:lastname,:cash)");
+		$code= md5(rand(0,1000));
+		$STH = $DBH->prepare("INSERT INTO finance75.users(username,password,firstname,lastname,cash,confirmCode)
+			    VALUES(:username,:password,:firstname,:lastname,:cash,:confirmCode)");
+		
 		//bind the value entered by user into the query string
-		$STH ->bindvalue(':username' , $username);
-		$STH ->bindvalue(':password' , $password);
-		$STH ->bindvalue(':firstname', $firstname);			
-		$STH ->bindvalue(':lastname' , $lastname);
-		$STH ->bindvalue(':cash'     , $cash);
+		$STH ->bindvalue(':username'   , $username);
+		$STH ->bindvalue(':password'   , $password);
+		$STH ->bindvalue(':firstname'  , $firstname);			
+		$STH ->bindvalue(':lastname'   , $lastname);
+		$STH ->bindvalue(':cash'       , $cash);
+		$STH ->bindvalue(':confirmCode', $code);
 			
 		//execute the query
-		$STH ->execute();
+		$STH ->execute();		
 	}
 	
+	//exit with error if unable to connect to database
 	catch(Exception $e){
 		echo('unable to add user');
 		exit;
 	}
 	
-	// count rows affected:
-	$_SESSION['authorize']=1;
+	//send user an activation email.  function defined in /includes/helpers
+	emailUser($user_info,$code);
+	
+	
+	// ************************************
+	// count rows affected, and log user in
+	// ************************************
 	$_SESSION['username'] = $_POST['username'];
 	$_SESSION['cash'] =$cash;
 	$DBH = null;
 	
 }
+
+
+//***************************************************************************
+// This function activates the users account from the email confirmation
+//***************************************************************************
+function activateUser($username,$code){
+
+	//connect to database with PDO 
+ 	$DBH = new PDO("mysql:host=localhost;dbname = finance75","jharvard","crimson");
+	//query the database for the username entered in the form field using a prepared statement: 
+	$DBH ->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);	
+	
+	try{
+		$STHc = $DBH->prepare("SELECT * FROM finance75.users 
+							   WHERE username = :username AND confirmCode = :code AND active = 0");
+							   
+		//bind the value entered by user into the query string
+		$STHc ->bindvalue(':username',$username);
+		$STHc ->bindvalue(':code',$code);
+		//execute the query
+		$STHc ->execute();
+	}
+	catch(PDOException $e){
+		echo('Unable to find account: ' . $e->getMessage());
+		//redirect()
+		//exit;
+	}
+	
+	try{
+		//prepare
+		$STH =  $DBH->prepare("UPDATE finance75.users 
+							   SET active = 1 
+							   WHERE username=:username AND confirmCode =:code");
+		//bind the value entered by user into the query string
+		$STH ->bindvalue(':username',$username);
+		$STH ->bindvalue(':code',$code);		
+		//execute the query
+		$STH ->execute();	
+		$DBH = null;
+	}
+	catch(PDOException $e){
+		echo('Unable to update account: ' . $e->getMessage());					
+	}
+}
 //***************************************************************************
 // This function queries the database to check if user is already a member.
 //***************************************************************************
 function verifyUser($username,$password){
-	//connect to database with PDO and se predefined un/pw for testing purposes:
+	//connect to database with PDO and se predefined userbane/pw for testing purposes:
  	$DBH = new PDO("mysql:host=localhost;dbname = finance75","jharvard","crimson");
 	
 	//query the database for the username entered in the form field using a prepared statement: 
@@ -75,7 +151,7 @@ function verifyUser($username,$password){
 	$row =$STH->fetch();
 	$DBH = null;		
 	//search to see if the corresponding password is correct
-	if($row['password']==$password){
+	if($row['password']==$password && $row['active'] == 1){
 		$_SESSION['authorize']=1;
 		$_SESSION['username'] = $username;
 		$_SESSION['cash'] = $row['cash'];
@@ -100,10 +176,10 @@ function getPortfolio($username){
 	$STH ->execute();
 	//use the fetch command to set the returned values into an associate array
 	$stocks =$STH->fetchAll();
-
+	$DBH_lookup = null;
 	return $stocks;
 	
-	}
+}
 //***************************************************************************
 //This function inputs a stock to purchase as an array with the fields
 //	symbol, price, shares.  It adds it to the database and updates the current 
@@ -342,5 +418,7 @@ function addTransaction($stock, $shares, $type){
 		exit;
 	}
 }
+
+
 ?>
 	

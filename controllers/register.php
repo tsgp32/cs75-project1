@@ -21,14 +21,16 @@ render('register');
 //--------------------------------------------------------------------------------
 //	Create a user arry to be added to table
 //--------------------------------------------------------------------------------
-if(isset($_POST['username'])){
+if(isset($_POST['username']) && isset($_POST['password']) &&  isset($_POST['firstname']) &&  isset($_POST['lastname'])){
 	$user = array('username'  => $_POST['username'],
 				  'password'  => $_POST['password'],
 				  'firstname' => $_POST['firstname'],
-				  'lastname'  => $_POST['lastname']);	
+				  'lastname'  => $_POST['lastname']);
+    
+    $msg = validEmail($_POST['username']);
 	addUser($user);
-	redirect('index');
-	}
+	//redirect('index');
+}
 
 render('footer');
 ?>

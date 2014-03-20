@@ -8,25 +8,32 @@
 /--------------------------------------------------------------------------------
 */
 ?>
+<form action = "<?=$_SERVER["PHP_SELF"] ?>" method = "post" role="form">
+ 
+ <div class="form-inline">
+  <div class="form-group">
+    <label for="exampleInputEmail1"></label>
+    <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email" name = "username">
+  </div>
 
-<form action = "<?=$_SERVER["PHP_SELF"] ?>" method = "post" />
-	<table>
-		<tr>
-			<td> Username: </td>
-			<td> <input type  = "text"     name = "username" /> </td>
-			<td> Password: </td>
-			<td> <input type  = "password" name = "password" /> </td>
-		</tr>
-				    
-		<tr>
-			<td> First Name: </td>
-			<td> <input type  = "text"     name = "firstname" />  </td>
-			<td> Last Name: </td>
-			<td> <input type  = "text"     name = "lastname"  /> </td>
-		</tr>
-				    
-		<tr>
-			<td colspan ='2' align = 'center'> <input type  = "submit"   value= "Register!" /> </td>
-		</tr>
+  <div class="form-group">
+    <label for="exampleInputPassword1"></label>
+    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" name = "password">
+  </div>
+ </div>
+ </br>
+ <div class="form-inline">
+  <div class="form-group">
+    <label for="exampleInputEmail1"></label>
+    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="First Name" name = "firstname">
+  </div>  
+
+  <div class="form-group">
+    <label for="exampleInputEmail1"></label>
+    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Last Name" name = "lastname">
+  </div>   
+ </div>
+ </br>
+ <button type="submit" class="btn btn-default">Register!</button>
 </form>
 

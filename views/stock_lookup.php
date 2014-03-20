@@ -9,47 +9,55 @@
 */
 ?>
 
-<!-- Add form to allow user to look up stock symbol -->
-<div align = 'center'>
-<form action = "<?=$_SERVER["PHP_SELF"]?>" method = 'post' >
-	<input type = 'text' name = 'symbols' /></br>
-	<input type = 'submit' name = 'submit' value = "Look up">
+
+<form class="form-inline" role="form" align = "center" method = "post">
+  <div class="form-group" >
+    <label class="sr-only" for="exampleInputEmail2">Stock Symbol</label>
+    <input type="text" class="form-control" id="exampleInputEmail2" placeholder="Stock Symbol" name = "symbols">
+  </div>
+  <button type="submit" class="btn btn-default">Look Up</button>
 </form>
-</div>
 
 
+	
+	
 <!-- Display stock lookup info to user -->
-<table align = 'center' cellpadding = '5px'>
-	<thead class = 'stocks'>
+<? if(isset($_POST['symbols'])):?>
+	
+	<div class = "container">
+	<table class="table table-striped" >
+	<thead>
 		<tr>
-			<th>Stock Name</th>
-			<th>Stock Symbol</th>     
-			<th>Current Price(USD)</th>    
-			</tr>
+			<th class="col-sm-1">Stock Name</th>
+			<th class="col-sm-1">Stock Symbol</th>     
+			<th class="col-sm-1">Current Price(USD)</th>    
+		</tr>
 	</thead>
 	<tbody>
 	
-	
-<!-- Convert string input to array-->
-<? if(isset($_POST['symbols'])){
-
+	<?
+	// Convert string input to array	
 	$symbols_parsed = preg_split("/[\s,]+/", $_POST["symbols"]);
 	$stocks = yahooStocks($symbols_parsed);
-	//print_r($stocks);
-	foreach($stocks as $stock){?>
-		<tr class = "stocks">
+	?>
+	
+	<?foreach($stocks as $stock):?>
+		<tr>
 			<td><?=$stock['name']?>  </td>
 			<td><?=$stock['symbol']?></td>
 			<td><?=$stock['price']?> </td>
 		</tr>
-	<?}
-	unset($_POST['symbols']);
-	unset($symbols_parsed);
-	unset($stocks);
-}?>
+	<? endforeach ?>
+	
+	<?
+		unset($_POST['symbols']);
+		unset($symbols_parsed);
+		unset($stocks);
+	?>
 	</tbody>
 </table>
+</div>	
+<?endif?>
 
-</br>
-</br>
+
 

@@ -31,7 +31,7 @@
 ?>
 
 <!--create table that displays users stocks -->
-<table align = 'center' cellpadding = '5px'>
+<table class="table table-striped" align="center">
 	<thead class = 'stocks' class = 'my_stocks'>
 		<tr>
 			<th>Name				</th>
@@ -42,12 +42,13 @@
 		</tr>
 	</thead>
 	
-	<tbody align = 'center'>
+	<tbody>
 		<tr>
 			<td>**CASH**</td>
 			<td></td>
 			<td></td>
 			<td><?=$_SESSION['cash']?></td>
+			<td></td>
 
 <?	if(isset($createTable)): ?>
 		<? foreach($portfolio as $index=>$stock):?>			

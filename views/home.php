@@ -7,7 +7,7 @@
 /--------------------------------------------------------------------------------
 */
 ?>
-<div>
+<div class = "main">
 	<p>Welcome to C$75 Finance!  Here you will be able to purchase real stocks using fictional money, 
 		and track your portfolio's performance over time.  Good luck!</p>
 	<p>If at anytime there is a problem and you want to reset your account (sell all stocks and be reset to your initially

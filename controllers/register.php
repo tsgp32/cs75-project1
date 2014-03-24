@@ -29,7 +29,6 @@ if(isset($_POST['username']) && isset($_POST['password']) &&  isset($_POST['firs
     
     $msg = validEmail($_POST['username']);
 	addUser($user);
-	//redirect('index');
 }
 
 render('footer');

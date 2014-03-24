@@ -47,7 +47,7 @@
 			<td>**CASH**</td>
 			<td></td>
 			<td></td>
-			<td><?=$_SESSION['cash']?></td>
+			<td><?=number_format($_SESSION['cash'],2);?></td>
 			<td></td>
 
 <?	if(isset($createTable)): ?>
@@ -58,7 +58,7 @@
 			<td><?=$temp['name'];?>        												</td>
 			<td><?=$stock['symbol']; ?> 												</td>
 			<td><?=$stock['shares'];?> 													</td>
-			<td><?=$temp['price']*$stock['shares'];?>  									</td>
+			<td><?=number_format($temp['price']*$stock['shares'],2);?>  				</td>
 			<td><?=number_format($temp['price']*$stock['shares']-$stock['price'],2);?>	</td>
 		</tr>
 		<? endforeach ?>
